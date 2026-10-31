@@ -64,7 +64,9 @@ The core planner in `OptimizationService.cs` uses a greedy lookahead strategy:
 
 ---
 
-## Deployment & Hosting
+## Live Demo & Deployment
+
+- **Interactive Cloud Demo:** The frontend on Vercel includes a built-in **Interactive Demo Mode** featuring pre-computed European routes (e.g., Berlin ➔ Munich for Petrol, Frankfurt ➔ Amsterdam for Diesel, Vienna ➔ Salzburg for EV). It allows immediate testing of interactive route polylines, station popups, and live serverless PDF generation without requiring a local backend or external API tokens.
 
 ### Production (Cherry Servers ➔ Vercel)
 - Originally hosted during university development on a **Cherry Servers cloud instance** running Docker containers for both .NET API and Nginx-served UI.

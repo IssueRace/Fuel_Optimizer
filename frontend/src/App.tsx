@@ -16,8 +16,11 @@ import {
   Save,
   Battery,
   ChevronDown,
-  AlertTriangle
+  AlertTriangle,
+  PlayCircle,
+  Sparkles
 } from 'lucide-react';
+import { DEMO_ROUTES } from './demoRoutes';
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -47,7 +50,9 @@ function MapRecenter({ coords }: { coords: [number, number][] }) {
   return null;
 }
 
-const PDF_SERVERLESS_URL = 'https://fuel-optimizer-ui-nsfr.vercel.app/api/report';
+const PDF_SERVERLESS_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+  ? '/api/report'
+  : 'https://fuel-optimizer-ui-nsfr.vercel.app/api/report';
 
 const API_BASE = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
   ? `${window.location.protocol}//${window.location.hostname}:5000`
@@ -195,10 +200,43 @@ function App() {
   const [history, setHistory] = useState<any[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [showProfile, setShowProfile] = useState(true);
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const [startingFuelLiters, setStartingFuelLiters] = useState<string>((activeProfile.capacity * 0.5).toFixed(1));
+
+  const loadDemoRoute = (demoId: string) => {
+    const demo = DEMO_ROUTES.find(d => d.id === demoId);
+    if (!demo) return;
+    setStart(demo.origin);
+    setEnd(demo.destination);
+    setActiveProfileId(demo.profileId);
+    setStartingFuelLiters(demo.startingFuelLiters);
+    setIsDemoMode(true);
+    setErrorMsg('');
+    setShowHistory(false);
+
+    const demoProfile = profiles.find(p => p.id === demo.profileId) || activeProfile;
+    const startFuelNum = parseFloat(demo.startingFuelLiters);
+
+    setResults({
+      distance: demo.data.totalDistanceKm,
+      cost: demo.data.totalCostEur,
+      coords: demo.data.routeCoordinates,
+      unreachableCoords: demo.data.unreachableCoordinates || [],
+      stops: demo.data.recommendedStops,
+      isPossible: demo.data.isPossible,
+      stoppedAtKm: demo.data.stoppedAtKm,
+      fuelType: demoProfile.type,
+      capacity: demoProfile.capacity,
+      consumption: demoProfile.consumption,
+      startingFuelPercent: Math.round((startFuelNum / demoProfile.capacity) * 100),
+      origin: demo.origin,
+      destination: demo.destination
+    });
+  };
 
   const handleCalculate = async () => {
     setShowHistory(false);
+    setIsDemoMode(false);
     const originClean = start.trim();
     const destClean = end.trim();
 
@@ -358,6 +396,47 @@ function App() {
           <div>
             <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>FuelFlow</h1>
             <span style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: 500 }}>Road Trip Optimizer</span>
+          </div>
+        </div>
+
+        {/* Interactive Demo Selector */}
+        <div style={{
+          background: 'rgba(56, 189, 248, 0.08)',
+          border: '1px solid rgba(56, 189, 248, 0.25)',
+          borderRadius: '12px',
+          padding: '12px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: '#38bdf8' }}>
+            <Sparkles size={14} />
+            <span>Interactive Demo Routes</span>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {DEMO_ROUTES.map(demo => (
+              <button
+                key={demo.id}
+                onClick={() => loadDemoRoute(demo.id)}
+                style={{
+                  background: isDemoMode && start === demo.origin ? 'rgba(56, 189, 248, 0.25)' : 'rgba(255, 255, 255, 0.05)',
+                  border: isDemoMode && start === demo.origin ? '1px solid #38bdf8' : '1px solid var(--border)',
+                  color: isDemoMode && start === demo.origin ? '#fff' : 'var(--text-dim)',
+                  padding: '6px 10px',
+                  borderRadius: '8px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <PlayCircle size={12} />
+                {demo.name.split(' (')[0]}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -696,6 +775,30 @@ function App() {
 
         {results && (
           <div style={{ position: 'absolute', bottom: '24px', left: '24px', right: '24px', display: 'flex', flexDirection: 'column', gap: '16px', zIndex: 1000 }}>
+            
+            {isDemoMode && (
+              <div style={{
+                background: 'rgba(15, 23, 42, 0.9)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid #38bdf8',
+                borderRadius: '12px',
+                padding: '10px 16px',
+                color: '#e2e8f0',
+                fontSize: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Sparkles size={16} color="#38bdf8" />
+                  <span>
+                    <strong>Cloud Demo Mode:</strong> Viewing pre-computed optimized route. Try clicking <strong>Download PDF Report</strong> to test serverless export!
+                  </span>
+                </div>
+                <span style={{ fontSize: '11px', color: '#94a3b8' }}>Live APIs running on self-hosted backend</span>
+              </div>
+            )}
             
             {!results.isPossible && (
               <div className="pulse-warning" style={{ 
