@@ -66,6 +66,7 @@ The core planner in `OptimizationService.cs` uses a greedy lookahead strategy:
 
 ## Live Demo & Deployment
 
+- **Live demo:** https://fuel-optimizer-delta.vercel.app
 - **Interactive Cloud Demo:** The frontend on Vercel includes a built-in **Interactive Demo Mode** featuring pre-computed European routes (e.g., Berlin ➔ Munich for Petrol, Frankfurt ➔ Amsterdam for Diesel, Vienna ➔ Salzburg for EV). It allows immediate testing of interactive route polylines, station popups, and live serverless PDF generation without requiring a local backend or external API tokens.
 
 ### Production (Cherry Servers ➔ Vercel)

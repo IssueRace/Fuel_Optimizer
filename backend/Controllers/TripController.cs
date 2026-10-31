@@ -40,12 +40,6 @@ public class TripController : ControllerBase
         if (request.Destination.Length > 100)
             return BadRequest("Destination city name must be 100 characters or less.");
 
-        if (request.Origin.Contains("bachurin", StringComparison.OrdinalIgnoreCase) ||
-            request.Origin.Contains("бачурин", StringComparison.OrdinalIgnoreCase) ||
-            request.Destination.Contains("bachurin", StringComparison.OrdinalIgnoreCase) ||
-            request.Destination.Contains("бачурин", StringComparison.OrdinalIgnoreCase))
-            return BadRequest("Please enter a valid city or address name.");
-
         if (request.FuelConsumption < 0.1 || request.FuelConsumption > 100.0)
             return BadRequest("Fuel consumption must be between 0.1 and 100.0.");
         if (request.FuelTankCapacity < 1.0 || request.FuelTankCapacity > 1000.0)
