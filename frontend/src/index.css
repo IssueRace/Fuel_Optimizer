@@ -1,4 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+@import 'leaflet/dist/leaflet.css';
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+  background: #0b0f1a !important;
+}
 
 :root {
   --bg-dark: #0b0f1a;

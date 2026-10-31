@@ -121,8 +121,8 @@ const getUserId = () => {
 };
 
 function App() {
-  const [start, setStart] = useState('');
-  const [end, setEnd] = useState('');
+  const [start, setStart] = useState(() => DEMO_ROUTES[0].origin);
+  const [end, setEnd] = useState(() => DEMO_ROUTES[0].destination);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   
@@ -196,12 +196,31 @@ function App() {
     destination: string
   };
   
-  const [results, setResults] = useState<ResultsType | null>(null);
+  const [results, setResults] = useState<ResultsType | null>(() => {
+    const demo = DEMO_ROUTES[0];
+    const demoProfile = defaultProfiles[0];
+    const startFuelNum = parseFloat(demo.startingFuelLiters);
+    return {
+      distance: demo.data.totalDistanceKm,
+      cost: demo.data.totalCostEur,
+      coords: demo.data.routeCoordinates,
+      unreachableCoords: demo.data.unreachableCoordinates || [],
+      stops: demo.data.recommendedStops,
+      isPossible: demo.data.isPossible,
+      stoppedAtKm: demo.data.stoppedAtKm,
+      fuelType: demoProfile.type,
+      capacity: demoProfile.capacity,
+      consumption: demoProfile.consumption,
+      startingFuelPercent: Math.round((startFuelNum / demoProfile.capacity) * 100),
+      origin: demo.origin,
+      destination: demo.destination
+    };
+  });
   const [history, setHistory] = useState<any[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [showProfile, setShowProfile] = useState(true);
-  const [isDemoMode, setIsDemoMode] = useState(false);
-  const [startingFuelLiters, setStartingFuelLiters] = useState<string>((activeProfile.capacity * 0.5).toFixed(1));
+  const [isDemoMode, setIsDemoMode] = useState(true);
+  const [startingFuelLiters, setStartingFuelLiters] = useState<string>(() => DEMO_ROUTES[0].startingFuelLiters);
 
   const loadDemoRoute = (demoId: string) => {
     const demo = DEMO_ROUTES.find(d => d.id === demoId);
