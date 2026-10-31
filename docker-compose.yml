@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - OpenRouteService__ApiKey=${OPENROUTESERVICE_API_KEY:-your_openrouteservice_api_key_here}
+      - Tankerkoenig__ApiKey=${TANKERKOENIG_API_KEY:-your_tankerkoenig_api_key_here}
+    volumes:
+      - backend-db:/app/data
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  backend-db:
